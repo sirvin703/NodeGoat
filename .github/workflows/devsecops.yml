@@ -1,0 +1,44 @@
+name: DevSecOps CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  security-scans:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------- Dependency scan (Snyk) ----------
+      # Uses the official Snyk Node action. Requires SNYK_TOKEN secret.
+      # continue-on-error keeps the demo flowing; switch to false to enforce a gate.
+      - name: Snyk dependency scan (Node.js)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      # ---------- Build the container image ----------
+      - name: Build Docker image
+        run: docker build -t nodegoat:demo .
+
+      # ---------- Container image scan (Trivy) ----------
+      # Prints a readable table; exits 0 so the demo doesn't "fail red".
+      - name: Trivy image scan (CRITICAL/HIGH)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: nodegoat:demo
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
