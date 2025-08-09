@@ -22,7 +22,7 @@ jobs:
       # continue-on-error keeps the demo flowing; switch to false to enforce a gate.
       - name: Snyk dependency scan (Node.js)
         uses: snyk/actions/node@master
-        continue-on-error: true
+        continue-on-error: false
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -41,4 +41,4 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '0'
+          exit-code: '1'
