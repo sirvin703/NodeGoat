@@ -17,6 +17,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Update lockfile only (no build)
+        run: npm install --package-lock-only
+
       # ---------- Dependency scan (Snyk) ----------
       # Uses the official Snyk Node action. Requires SNYK_TOKEN secret.
       # continue-on-error keeps the demo flowing; switch to false to enforce a gate.
